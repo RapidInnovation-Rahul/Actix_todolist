@@ -22,7 +22,7 @@ async fn main() -> std::io::Result<()>{
             .route("/{username}", web::get().to(user_status))
             .route("/{username}/display", web::get().to(display))
             .service(lib::add)
-            // .service(lib:: delete)
+            .service(lib::delete)
             .app_data(database.clone())
 
     })

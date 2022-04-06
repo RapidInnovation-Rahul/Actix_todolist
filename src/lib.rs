@@ -63,9 +63,26 @@ pub async fn add(task: Json<Add_task>, username: Path<Username>, state: Data<Has
         None => HttpResponse::Ok().json(format!("The User_Name {} does not exist.", username.name)),
     }
 }
-// // ********deleting task from list
-// #[get("/{username}/delete")]
-// pub async fn delete(){
-
-// }
+// ********deleting task from list)
+#[derive(Serialize, Deserialize)]
+pub struct DelTask{
+    indx: usize,
+}
+#[post("/{username}/delete")]
+pub async fn delete(task: Json<DelTask>, username: Path<Username>, state:Data<HashMap<String, User>>) -> impl Responder{
+    let user = state.get(&username.name);
+    let todo = task.into_inner();
+    match user{
+        Some(_user) => {
+            {
+                let mut new_task = _user.todo.lock().unwrap();
+                new_task.remove(todo.indx);
+            }
+            update_db(&state, String::from("database.json"));
+            HttpResponse::Ok().json(format!("Your new updated todo list is: {:?}", &_user.todo))
+        }
+        None => HttpResponse::Ok().json(format!("The User_name {} does not exist.", &username.name)),
+    }
+    
+}
 
