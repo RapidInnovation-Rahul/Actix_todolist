@@ -4,7 +4,7 @@ use std::{collections::HashMap, fs::File};
 use serde_json::Result;
 
 mod lib;
-use lib::{User,user_status};
+use lib::{User,user_status,display};
 
 fn read_data(path: String) -> Result<HashMap<String,User>>{
     let file = File::open(path).expect("failed to read data from the database!!");
@@ -17,17 +17,16 @@ fn read_data(path: String) -> Result<HashMap<String,User>>{
 async fn main() -> std::io::Result<()>{
     let database = read_data(String::from("database.json")).unwrap();
     let database = web::Data::new(database);
-    HttpServer::new(|| {
+    HttpServer::new( move || {
         App::new()
             .route("/{username}", web::get().to(user_status))
-            .route("/{username}", web::get().to(display))
+            .route("/{username}/display", web::get().to(display))
             .service(lib::add)
-            .service(lib:: delete)
+            // .service(lib:: delete)
+            .app_data(database.clone())
 
     })
-    .bind("localhost:8080")?
-    .bind("localhost:8080")?
-    .bind("localhost:8080")?
+    .bind("127.0.0.1:8080")?
     .run()
     .await
 }
