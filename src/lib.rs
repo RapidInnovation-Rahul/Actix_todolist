@@ -1,4 +1,4 @@
-use actix_web::{post, web::{Data, Json, Path}, HttpResponse, Responder};
+use actix_web::{post,web::{Data, Json, Path}, HttpResponse, Responder};
 
 use std::{collections::HashMap, fs::File, sync::Mutex};
 
@@ -11,7 +11,7 @@ pub struct User{
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Username{
-    name : String,
+    username : String,
 }
 
 
@@ -23,19 +23,19 @@ fn update_db(data: &HashMap<String, User> , path: String){
 
 
 // *******searching for user in database
-// #[get("/{username}")] 
+// #[get("/{username}")]
 pub async fn user_status(username: Path<Username>, state: Data<HashMap<String, User>>) -> HttpResponse{
-    let user = state.get(&username.name);
+    let user = state.get(&username.username);
     match user{
-        Some(_user) => HttpResponse::Ok().json(format!("Welcome{}", username.name)),
-        None => HttpResponse::Ok().json(format!("{} does not exist", username.name)),
+        Some(_user) => HttpResponse::Ok().json(format!("Welcome {}", username.username)),
+        None => HttpResponse::Ok().json(format!("{} does not exist", username.username)),
     }
 }
 
 // ******display todolist
 // #[get("/{username}/display")]
 pub async fn display(username: Path<Username>, state: Data<HashMap<String, User>>) -> impl Responder{
-    let user = state.get(&username.name);
+    let user = state.get(&username.username);
     match user{
         Some(_user) => HttpResponse::Ok().json(format!("Here is your ToDo_List: {:?}", &_user.todo)),
         None => HttpResponse::Ok().body("you have no Task to do!!!"),
@@ -49,7 +49,7 @@ pub struct Add_task{
 }
 #[post("/{username}/add")]
 pub async fn add(task: Json<Add_task>, username: Path<Username>, state: Data<HashMap<String, User>>) -> impl Responder{
-    let user = state.get(&username.name);
+    let user = state.get(&username.username);
     let todo = task.into_inner();
     match user{
         Some(x) => {
@@ -60,7 +60,7 @@ pub async fn add(task: Json<Add_task>, username: Path<Username>, state: Data<Has
             update_db(&state, String::from("database.json"));
             HttpResponse::Ok().json(format!("your updated todo list is: {:?}",&x.todo))
         }
-        None => HttpResponse::Ok().json(format!("The User_Name {} does not exist.", username.name)),
+        None => HttpResponse::Ok().json(format!("The User_Name {} does not exist.", username.username)),
     }
 }
 // ********deleting task from list)
@@ -70,7 +70,7 @@ pub struct DelTask{
 }
 #[post("/{username}/delete")]
 pub async fn delete(task: Json<DelTask>, username: Path<Username>, state:Data<HashMap<String, User>>) -> impl Responder{
-    let user = state.get(&username.name);
+    let user = state.get(&username.username);
     let todo = task.into_inner();
     match user{
         Some(_user) => {
@@ -81,7 +81,7 @@ pub async fn delete(task: Json<DelTask>, username: Path<Username>, state:Data<Ha
             update_db(&state, String::from("database.json"));
             HttpResponse::Ok().json(format!("Your new updated todo list is: {:?}", &_user.todo))
         }
-        None => HttpResponse::Ok().json(format!("The User_name {} does not exist.", &username.name)),
+        None => HttpResponse::Ok().json(format!("The User_name {} does not exist.", &username.username)),
     }
     
 }

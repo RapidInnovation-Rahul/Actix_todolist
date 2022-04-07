@@ -16,15 +16,15 @@ fn read_data(path: String) -> Result<HashMap<String,User>>{
 #[actix_web::main]
 async fn main() -> std::io::Result<()>{
     let database = read_data(String::from("database.json")).unwrap();
-    let database = web::Data::new(database);
+    let dataset = web::Data::new(database);
     HttpServer::new( move || {
         App::new()
             .route("/{username}", web::get().to(user_status))
+            // .service(user_status)
             .route("/{username}/display", web::get().to(display))
             .service(lib::add)
             .service(lib::delete)
-            .app_data(database.clone())
-
+            .app_data(dataset.clone())
     })
     .bind("127.0.0.1:8080")?
     .run()
